@@ -11,7 +11,9 @@ export default function AnimeDetails() {
   const [loading, setLoading] = useState(true);
   const [selectedEpisodeUrl, setSelectedEpisodeUrl] = useState(null);
   const [isNavigatingBack, setIsNavigatingBack] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false); // State to track if anime is already a favorite
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favorites, setFavorites] = useState([]);
+  const [currentPosition, setCurrentPosition] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -26,31 +28,71 @@ export default function AnimeDetails() {
   }, [id]);
 
   useEffect(() => {
-    const checkIfFavorite = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+    const fetchFavorites = async () => {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('Error fetching user:', userError);
+        return;
+      }
+
       if (!user) return;
 
       const { data, error } = await supabase
         .from('favorites')
         .select('*')
-        .eq('user_id', user.id)
-        .eq('title', anime?.title); // Check if the anime is already in favorites
+        .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error checking favorites:', error);
+        console.error('Error fetching favorites:', error);
       } else {
-        setIsFavorite(data.length > 0); // Update favorite status based on result
+        setFavorites(data);
       }
     };
 
+    fetchFavorites();
+  }, []);
+
+  const checkIfFavorite = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('favorites')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('title', anime?.title);
+
+    if (error) {
+      console.error('Error checking favorites:', error);
+    } else {
+      setIsFavorite(data.length > 0);
+    }
+  };
+
+  useEffect(() => {
     if (anime) {
       checkIfFavorite();
     }
   }, [anime]);
 
   const handleEpisodeClick = async (episode) => {
-    const videoUrl = await scrapeEpisodeVideoUrl(episode.link);
-    setSelectedEpisodeUrl(videoUrl);
+    try {
+      const videoUrl = await scrapeEpisodeVideoUrl(episode.link);
+      if (!videoUrl) {
+        throw new Error('Failed to fetch video URL');
+      }
+      setSelectedEpisodeUrl(videoUrl);
+
+      const savedPosition = getSavedPosition(episode.title);
+      setCurrentPosition(savedPosition);
+    } catch (error) {
+      console.error('Error fetching video URL:', error);
+    }
+  };
+
+  const getSavedPosition = (episodeTitle) => {
+    const savedFavorite = favorites.find(fav => fav.title === episodeTitle);
+    return savedFavorite ? savedFavorite.current_position : 0;
   };
 
   const handleBackClick = () => {
@@ -60,28 +102,46 @@ export default function AnimeDetails() {
     }, 100);
   };
 
-  const handleAddFavorite = async () => {
+  const handleToggleFavorite = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       console.error('User not authenticated');
       return;
     }
 
-    const { data, error } = await supabase
-      .from('favorites')
-      .insert([
-        {
-          user_id: user.id,
-          title: anime.title,
-          imageUrl: anime.imageUrl,
-        }
-      ]);
+    if (isFavorite) {
+      // Remove from favorites
+      const { error } = await supabase
+        .from('favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('title', anime.title);
 
-    if (error) {
-      console.error('Error adding favorite:', error);
+      if (error) {
+        console.error('Error removing favorite:', error);
+      } else {
+        setIsFavorite(false);
+        console.log('Favorite removed');
+      }
     } else {
-      console.log('Favorite added:', data);
-      setIsFavorite(true); // Update state to reflect that the anime is now a favorite
+      // Add to favorites
+      const { data, error } = await supabase
+        .from('favorites')
+        .insert([
+          {
+            user_id: user.id,
+            title: anime.title,
+            imageUrl: anime.imageUrl,
+            current_position: currentPosition,
+          }
+        ]);
+
+      if (error) {
+        console.error('Error adding favorite:', error);
+      } else {
+        setIsFavorite(true);
+        console.log('Favorite added:', data);
+      }
     }
   };
 
@@ -109,11 +169,10 @@ export default function AnimeDetails() {
           <p className="font-bold mb-2">Status: <span className="text-blue-500">{anime.status}</span></p>
           <p className="font-bold mb-4">Total Episodes: <span className="text-blue-500">{anime.totalEpisodes}</span></p>
           <button 
-            onClick={handleAddFavorite} 
+            onClick={handleToggleFavorite} 
             className={`btn ${isFavorite ? 'btn-secondary' : 'btn-primary'} mt-2`} 
-            disabled={isFavorite} // Disable button if already a favorite
           >
-            {isFavorite ? 'Added to Favorites' : 'Add to Favorites'}
+            {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
           </button>
         </div>
       </div>

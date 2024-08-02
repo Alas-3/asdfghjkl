@@ -5,7 +5,10 @@ import { searchAnime } from '../lib/scrape';
 // Function to convert title to URL slug
 const createAnimeUrlSlug = (title) => {
   return title
+    .normalize('NFD') // Normalize to decompose accented characters
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
     .toLowerCase()
+    .replace(/(\d)\.(\d)/g, '$1-$2') // Replace periods in numeric sequences with hyphens
     .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric characters with hyphens
     .replace(/^-|-$/g, ''); // Remove leading and trailing hyphens
 };
