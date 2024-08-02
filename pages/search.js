@@ -1,7 +1,25 @@
-// pages/search.js
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { searchAnime } from '../lib/scrape';
+
+// Function to convert title to URL slug
+const createAnimeUrlSlug = (title) => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric characters with hyphens
+    .replace(/^-|-$/g, ''); // Remove leading and trailing hyphens
+};
+
+// Skeleton loader component
+const SkeletonLoader = () => (
+  <div className="card bg-base-100 shadow-lg animate-pulse">
+    <figure className="h-64 w-full bg-gray-200"></figure>
+    <div className="card-body">
+      <h2 className="h-6 bg-gray-200 rounded w-3/4"></h2>
+      <h3 className="h-4 bg-gray-200 rounded w-1/2 mt-2"></h3>
+    </div>
+  </div>
+);
 
 export default function SearchResults() {
   const [animes, setAnimes] = useState([]);
@@ -32,6 +50,12 @@ export default function SearchResults() {
     router.push(`/search?query=${encodeURIComponent(searchTerm)}`);
   };
 
+  // Function to navigate to the anime details page
+  const handleAnimeClick = (anime) => {
+    const urlSlug = createAnimeUrlSlug(anime.title);
+    router.push(`/anime/${urlSlug}`);
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -52,20 +76,31 @@ export default function SearchResults() {
       </form>
 
       {loading ? (
-        <p>Loading...</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <SkeletonLoader key={index} />
+          ))}
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {animes.map((anime) => (
-            <div key={anime.title} className="card bg-base-100 shadow-lg">
-              <figure>
-                <img src={anime.imageUrl} alt={anime.title} />
+            <div
+              key={anime.title}
+              className="card bg-base-100 shadow-lg cursor-pointer"
+              onClick={() => handleAnimeClick(anime)}
+            >
+              <figure className="h-64 w-full overflow-hidden">
+                <img src={anime.imageUrl} alt={anime.title} className="object-cover h-full w-full" />
               </figure>
               <div className="card-body">
                 <h2 className="card-title">{anime.title}</h2>
                 <h3 className="text-sm text-gray-500">{anime.episode}</h3>
-                <a href={`https://gogoanime3.co${anime.link}`} className="btn btn-primary">
+                <button 
+                  onClick={() => handleAnimeClick(anime)} 
+                  className="btn btn-primary mt-2"
+                >
                   Watch Now
-                </a>
+                </button>
               </div>
             </div>
           ))}

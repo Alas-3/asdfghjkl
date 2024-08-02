@@ -59,7 +59,7 @@ export default function Login() {
           Login
         </button>
         <p className="mt-4 text-center">
-          Don't have an account? <Link href="/signup" className="text-blue-500">Sign Up</Link>
+          Don't have an account? Looks like you're not welcome here 😢
         </p>
       </form>
     </div>
