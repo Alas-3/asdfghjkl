@@ -9,6 +9,7 @@ const createAnimeUrlSlug = (title) => {
     .normalize('NFD') // Normalize to decompose accented characters
     .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
     .toLowerCase()
+    .replace(/[()]/g, '') // Remove parentheses but keep their content
     .replace(/(\d)\.(\d)/g, '$1-$2') // Replace periods in numeric sequences with hyphens
     .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric characters with hyphens
     .replace(/^-|-$/g, ''); // Remove leading and trailing hyphens
@@ -110,12 +111,19 @@ export default function AnimeDetails() {
 
   const handleEpisodeClick = async (episode) => {
     try {
-      const videoUrl = await scrapeEpisodeVideoUrl(episode.link);
-      if (!videoUrl) {
+      // Create the episode slug
+      const episodeSlug = createAnimeUrlSlug(episode.title);
+  
+      // Construct the URL using the anime title and episode slug
+      const animeSlug = createAnimeUrlSlug(anime.title);
+      const videoUrl = `https://gogoanime3.co/${animeSlug}-${episodeSlug}`;
+  
+      const fetchedVideoUrl = await scrapeEpisodeVideoUrl(videoUrl);
+      if (!fetchedVideoUrl) {
         throw new Error('Failed to fetch video URL');
       }
-      setSelectedEpisodeUrl(videoUrl);
-
+      setSelectedEpisodeUrl(fetchedVideoUrl);
+  
       // Save the episode to watched_episodes
       await saveWatchedEpisode(episode);
     } catch (error) {

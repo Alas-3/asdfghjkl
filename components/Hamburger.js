@@ -1,5 +1,7 @@
+// components/Hamburger.js
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { supabase } from '../lib/supabase'; // Import supabase
 
 const HamburgerMenu = ({ setMenuOpen, menuOpen }) => {
   const router = useRouter();
