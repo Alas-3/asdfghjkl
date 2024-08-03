@@ -1,8 +1,18 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { scrapeAnimeDetails, scrapeEpisodeVideoUrl } from '../../lib/scrape';
-import VideoPlayer from '../../components/VideoPlayer';
 import { supabase } from '../../lib/supabase';
+import { FiPlay } from 'react-icons/fi';
+
+const createAnimeUrlSlug = (title) => {
+  return title
+    .normalize('NFD') // Normalize to decompose accented characters
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
+    .toLowerCase()
+    .replace(/(\d)\.(\d)/g, '$1-$2') // Replace periods in numeric sequences with hyphens
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric characters with hyphens
+    .replace(/^-|-$/g, ''); // Remove leading and trailing hyphens
+};
 
 export default function AnimeDetails() {
   const router = useRouter();
@@ -13,7 +23,7 @@ export default function AnimeDetails() {
   const [isNavigatingBack, setIsNavigatingBack] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favorites, setFavorites] = useState([]);
-  const [currentPosition, setCurrentPosition] = useState(0);
+  const [lastWatchedEpisode, setLastWatchedEpisode] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -72,8 +82,31 @@ export default function AnimeDetails() {
   useEffect(() => {
     if (anime) {
       checkIfFavorite();
+      fetchLastWatchedEpisode(); // Fetch the last watched episode when anime details are available
     }
   }, [anime]);
+
+  const fetchLastWatchedEpisode = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('watched_episodes')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('anime_id', anime.title)
+      .order('created_at', { ascending: false }) // Order by created_at descending
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error('Error fetching last watched episode:', error);
+    } else {
+      if (data) {
+        setLastWatchedEpisode(data);
+      }
+    }
+  };
 
   const handleEpisodeClick = async (episode) => {
     try {
@@ -83,16 +116,37 @@ export default function AnimeDetails() {
       }
       setSelectedEpisodeUrl(videoUrl);
 
-      const savedPosition = getSavedPosition(episode.title);
-      setCurrentPosition(savedPosition);
+      // Save the episode to watched_episodes
+      await saveWatchedEpisode(episode);
     } catch (error) {
       console.error('Error fetching video URL:', error);
     }
   };
 
-  const getSavedPosition = (episodeTitle) => {
-    const savedFavorite = favorites.find(fav => fav.title === episodeTitle);
-    return savedFavorite ? savedFavorite.current_position : 0;
+  const saveWatchedEpisode = async (episode) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('watched_episodes')
+      .insert([
+        {
+          user_id: user.id,
+          anime_id: anime.title,
+          episode_title: episode.title,
+          episode_number: episode.number,
+          created_at: new Date().toISOString(), // Add the created_at timestamp
+        },
+      ]);
+
+    if (error) {
+      console.error('Error saving watched episode:', error);
+    } else {
+      console.log('Watched episode saved:', {
+        anime_id: anime.id,
+        episode_title: episode.title,
+      });
+    }
   };
 
   const handleBackClick = () => {
@@ -132,7 +186,6 @@ export default function AnimeDetails() {
             user_id: user.id,
             title: anime.title,
             imageUrl: anime.imageUrl,
-            current_position: currentPosition,
           }
         ]);
 
@@ -142,6 +195,33 @@ export default function AnimeDetails() {
         setIsFavorite(true);
         console.log('Favorite added:', data);
       }
+    }
+  };
+
+  const handleResumeClick = async () => {
+    if (!lastWatchedEpisode) {
+      console.error('No last watched episode available');
+      return;
+    }
+
+    // Debugging log
+    console.log('Last Watched Episode:', lastWatchedEpisode);
+
+    // Create the anime and episode slugs
+    const episodeSlug = createAnimeUrlSlug(lastWatchedEpisode.episode_title.toLowerCase());
+    const animeSlug = createAnimeUrlSlug(anime.title);
+
+    // Construct the video URL
+    const videoUrl = `https://gogoanime3.co/${animeSlug}-${episodeSlug}`;
+
+    // Fetch the video URL using scrapeEpisodeVideoUrl
+    const videoPlayerUrl = await scrapeEpisodeVideoUrl(videoUrl);
+
+    // If a video player URL is successfully retrieved, set it to state
+    if (videoPlayerUrl) {
+      setSelectedEpisodeUrl(videoPlayerUrl);
+    } else {
+      console.error('Failed to retrieve video player URL');
     }
   };
 
@@ -168,45 +248,60 @@ export default function AnimeDetails() {
           <p className="font-bold mb-2">Genres: <span className="text-blue-500">{anime.genres.join(', ')}</span></p>
           <p className="font-bold mb-2">Status: <span className="text-blue-500">{anime.status}</span></p>
           <p className="font-bold mb-4">Total Episodes: <span className="text-blue-500">{anime.totalEpisodes}</span></p>
-          <button 
-            onClick={handleToggleFavorite} 
-            className={`btn ${isFavorite ? 'btn-secondary' : 'btn-primary'} mt-2`} 
-          >
-            {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-          </button>
+          <div className="flex items-center mt-2">
+            <button 
+              onClick={handleToggleFavorite} 
+              className={`btn ${isFavorite ? 'btn-secondary' : 'btn-primary'} mr-2`} 
+            >
+              {isFavorite ? 'Remove from Watching' : 'Add to Watchlist'}
+            </button>
+            <button onClick={handleResumeClick} className="btn btn-accent" disabled={!lastWatchedEpisode}>
+              <FiPlay className="inline-block mr-2" />
+              Resume
+            </button>
+          </div>
+          {lastWatchedEpisode && (
+            <p className="mt-2">Last watched episode: <span className="text-blue-500">{lastWatchedEpisode.episode_title}</span></p>
+          )}
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold mb-4">Episodes</h2>
-      {anime.episodes.length > 0 ? (
-        <ul className="grid grid-cols-2 md:grid-cols-10 gap-6">
-          {anime.episodes.map((episode, index) => (
-            <li key={index} className="my-2">
-              <button
-                onClick={() => handleEpisodeClick(episode)}
-                className="btn btn-primary w-full"
-              >
-                {episode.title}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No episodes found.</p>
-      )}
-
+      {/* Video Player */}
       {selectedEpisodeUrl && (
         <div className="mt-8">
-          <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+          <h2 className="text-2xl font-semibold mb-4">Now Playing</h2>
+          <div className="relative w-full h-0 pb-[68%] md:pb-[56.25%]"> {/* 68% for mobile, 56.25% for larger screens */}
             <iframe
               src={selectedEpisodeUrl}
-              className="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg"
-              frameBorder="0"
+              title="Anime Episode"
+              className="absolute top-0 left-0 w-full h-full rounded-lg" // Added rounded corners
               allowFullScreen
             ></iframe>
           </div>
         </div>
       )}
+
+
+      {/* Episode List */}
+      <div className="flex overflow-x-auto space-x-2 py-4">
+        {anime.episodes.map((episode, index) => {
+          // Check if the current episode is the last watched episode
+          const isLastWatched = lastWatchedEpisode && lastWatchedEpisode.episode_title === episode.title;
+
+          return (
+            <button 
+              key={index} 
+              onClick={() => handleEpisodeClick(episode)} 
+              className={`btn btn-outline ${isLastWatched ? 'border-2 border-green-500' : ''}`} // Apply green border if it's the last watched episode
+            >
+              {/* Display only the episode number on mobile */}
+              <span className="text-base md:hidden">{episode.title.replace(/Episode\s+/i, '')}</span>
+              {/* Full episode title for larger screens */}
+              <span className="hidden md:block">{episode.title}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
