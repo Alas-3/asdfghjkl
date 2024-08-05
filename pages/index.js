@@ -53,32 +53,47 @@ function Home() {
 
   return (
     <div className="container mx-auto p-6 relative">
-      <div className="sticky top-0 z-20 pt-4"> {/* Added mt-6 for margin top */}
-        <HamburgerMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
-        <div className="absolute top-4 right-4 flex items-center">
-          <button onClick={() => setSearchVisible(!searchVisible)} className="flex items-center justify-center p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-          </button>
-          {searchVisible && (
-            <form onSubmit={handleSearch} className="ml-2">
-              <input
-                type="text"
-                placeholder="Search Animes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input input-bordered w-full md:w-64 transition-all duration-300"
-              />
-            </form>
-          )}
-        </div>
-      </div>
+      <div className="sticky top-0 z-20"> {/* Added mt-6 for margin top */}
+  <HamburgerMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+  <div className="absolute top-4 right-4 flex items-center">
+    <button onClick={() => setSearchVisible(!searchVisible)} className="flex items-center justify-center lg:p-2">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth="1.5"
+        stroke="currentColor"
+        className="w-7 h-7"
+        style={{
+          filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8))', // Add subtle shadow
+        }}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+        />
+      </svg>
+    </button>
+    {searchVisible && (
+      <form onSubmit={handleSearch} className="ml-2">
+        <input
+          type="text"
+          placeholder="Search Animes..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="input input-bordered w-full md:w-64 transition-all duration-300"
+        />
+      </form>
+    )}
+  </div>
+</div>
+
 
 
       <HeroBanner animes={animes} /> {/* Add the HeroBanner component here */}
 
-      <div className="mt-16"> {/* Increased margin to move down further */}
+      <div className="mt-5"> {/* Increased margin to move down further */}
         <AnimeCarousel /> {/* Add the AnimeCarousel component here */}
         <NewAnimeCarousel /> {/* Add the NewAnimeCarousel component here */}
         <AnimeSchedule />

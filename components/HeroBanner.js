@@ -40,15 +40,15 @@ const HeroBanner = ({ animes }) => {
   const { title, imageUrl } = animes[currentIndex];
 
   return (
-    <div className="relative mt-16 cursor-pointer" onClick={handleClick} {...handlers}>
-      <div className="hero-banner h-96 md:h-[32rem] lg:h-[40rem] w-full relative overflow-hidden rounded-lg shadow-lg">
+    <div className="relative w-full cursor-pointer lg:rounded-t-lg" onClick={handleClick} {...handlers}>
+      <div className="hero-banner h-[calc(90vh-3rem)] md:h-[32rem] lg:h-[40rem] w-[calc(100%+3rem)] lg:w-full relative overflow-hidden lg:rounded-t-lg -mx-6 lg:mx-0 -mt-6 lg:mt-0">
         <img
           src={imageUrl}
           alt={title}
-          className="absolute inset-0 w-full h-full object-cover object-center transform transition-transform duration-500 ease-in-out hover:scale-105"
+          className="absolute inset-0 w-full h-full object-cover object-center transform transition-transform duration-500 ease-in-out hover:scale-105 lg:rounded-t-lg"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
-        <div className="absolute bottom-0 left-0 w-full p-4 md:p-8 lg:p-12 text-white">
+        <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent lg:rounded-t-lg"></div>
+        <div className="absolute bottom-0 left-0 w-full p-6 md:p-8 lg:p-12 text-white">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">{title}</h1>
         </div>
       </div>

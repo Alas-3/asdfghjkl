@@ -16,7 +16,7 @@ const HamburgerMenu = ({ setMenuOpen, menuOpen }) => {
 
   return (
     <div className="absolute top-4 left-4 z-20">
-      <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center justify-center p-2"> {/* Remove btn-primary class and added padding */}
+      <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center justify-center lg:p-2"> {/* Remove btn-primary class and added padding */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
