@@ -9,11 +9,35 @@ const NewAnimeCarousel = () => {
     const [loading, setLoading] = useState(true);
     const router = useRouter(); // Initialize router
 
+    const cacheKey = 'newAnimeCarousel';
+    const cacheTimestampKey = 'newAnimeCarousel_timestamp';
+    const cacheValidDuration = 60 * 60 * 1000; // 1 hour in milliseconds
+
     useEffect(() => {
         const fetchNewAnimes = async () => {
-            const animes = await scrapeNewAnimeThisSeason(); // Scrape new anime
-            setNewAnimes(animes);
-            setLoading(false);
+            // Check localStorage for cached data and its timestamp
+            const cachedData = JSON.parse(localStorage.getItem(cacheKey));
+            const cacheTimestamp = localStorage.getItem(cacheTimestampKey);
+            const currentTime = Date.now();
+
+            // If we have cached data and it is still valid, use it
+            if (cachedData && cacheTimestamp && (currentTime - cacheTimestamp < cacheValidDuration)) {
+                setNewAnimes(cachedData);
+                setLoading(false);
+                return; // Use cached data
+            }
+
+            try {
+                const animes = await scrapeNewAnimeThisSeason(); // Scrape new anime
+                setNewAnimes(animes);
+                // Store the fetched data and current timestamp in localStorage
+                localStorage.setItem(cacheKey, JSON.stringify(animes));
+                localStorage.setItem(cacheTimestampKey, currentTime);
+            } catch (error) {
+                console.error('Error fetching new anime:', error);
+            } finally {
+                setLoading(false); // Ensure loading state is updated
+            }
         };
 
         fetchNewAnimes();

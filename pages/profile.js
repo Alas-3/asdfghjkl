@@ -58,7 +58,6 @@ function Profile() {
     const slug = createAnimeUrlSlug(anime.title);
     router.push(`/anime/${slug}`);
 
-    // Save current episode and position in state to pass to AnimeDetails component
     setTimeout(() => {
       const currentEpisodeUrl = `/anime/${slug}/episode-${anime.current_episode}`;
       router.push(currentEpisodeUrl);
@@ -73,7 +72,7 @@ function Profile() {
     <div className="flex flex-col min-h-screen relative">
       <button
         onClick={handleHomeClick}
-        className="btn btn-primary absolute top-6 left-8 z-10 p-2 flex items-center justify-center" // Added flex for centering the SVG
+        className="btn btn-primary absolute top-6 right-8 z-10 p-2 flex items-center justify-center" // Moved to the right
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -81,7 +80,7 @@ function Profile() {
           viewBox="0 0 24 24"
           strokeWidth="1.5"
           stroke="currentColor"
-          className="w-6 h-6" // Set width and height of the SVG
+          className="w-6 h-6"
         >
           <path
             strokeLinecap="round"
@@ -90,40 +89,33 @@ function Profile() {
           />
         </svg>
       </button>
+
+      {/* Bubble-like Title */}
+      <div className="flex justify-start p-6">
+        <h1 className="bg-blue-500 text-white px-4 py-2 rounded-full text-2xl font-semibold shadow-lg">
+          Your Watchlist
+        </h1>
+      </div>
+
       <div className="flex-grow container mx-auto p-6">
-        <h1 className="text-3xl font-semibold mb-6 text-center mt-12">Your Watchlist</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {favorites.map((anime) => (
-            <div
-              key={anime.id}
-              className="bg-base-200 rounded-lg shadow-lg cursor-pointer transition-transform transform hover:scale-105 w-64 h-90 mx-auto" // Set width and height for cards
-              onClick={() => handleAnimeClick(anime)}
-            >
-              <img
-                src={anime.imageUrl}
-                alt={anime.title}
-                className="rounded-t-lg w-full h-3/4 object-cover" // Use object-cover to fill the image area
-              />
-              <div className="p-4 flex flex-col justify-between h-1/4"> {/* Flexbox for title and buttons */}
-                <h2 className="text-xl font-bold mb-2 overflow-hidden text-ellipsis whitespace-nowrap">
-                  {truncateTitle(anime.title)}
-                </h2>
-                {anime.current_episode !== null && (
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-gray-600">
-                      Last Watched: Episode {anime.current_episode}
-                    </p>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleResumeClick(anime);
-                      }}
-                      className="btn btn-secondary btn-sm"
-                    >
-                      Resume
-                    </button>
+            <div className="flex justify-center" key={anime.id} onClick={() => handleAnimeClick(anime)}>
+              <div className="card bg-base-100 shadow-lg cursor-pointer relative transition-transform transform hover:scale-105 hover:shadow-xl rounded-lg overflow-hidden" 
+                style={{ width: '250px', height: 'auto' }}>
+                <figure className="h-64 lg:h-80 w-full overflow-hidden relative rounded-t-lg"> {/* Changed height for desktop */}
+                  <img
+                    src={anime.imageUrl}
+                    alt={`Image of ${anime.title}`}
+                    className="object-cover h-full w-full"
+                  />
+                  <div className="absolute bottom-0 w-full bg-gradient-to-b from-transparent via-black/70 to-black p-2">
+                    <h2 className="text-white text-lg font-bold">{truncateTitle(anime.title, 20)}</h2>
+                    {anime.current_episode !== null && (
+                      <h3 className="text-sm text-gray-300">Episode {anime.current_episode}</h3>
+                    )}
                   </div>
-                )}
+                </figure>
               </div>
             </div>
           ))}

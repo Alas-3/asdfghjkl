@@ -1,4 +1,3 @@
-// components/Hamburger.js
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabase'; // Import supabase
@@ -17,8 +16,17 @@ const HamburgerMenu = ({ setMenuOpen, menuOpen }) => {
 
   return (
     <div className="absolute top-4 left-4 z-20">
-      <button onClick={() => setMenuOpen(!menuOpen)} className="btn btn-primary">
-        &#9776; {/* Hamburger icon */}
+      <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center justify-center p-2"> {/* Remove btn-primary class and added padding */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="currentColor"
+          className="w-8 h-8" // Increased size of the hamburger icon
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
       </button>
       {menuOpen && (
         <>

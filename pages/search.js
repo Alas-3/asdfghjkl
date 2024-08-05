@@ -15,14 +15,23 @@ const createAnimeUrlSlug = (title) => {
 
 // Skeleton loader component
 const SkeletonLoader = () => (
-  <div className="card bg-base-100 shadow-lg animate-pulse">
-    <figure className="h-64 w-full bg-gray-200"></figure>
-    <div className="card-body">
-      <h2 className="h-6 bg-gray-200 rounded w-3/4"></h2>
-      <h3 className="h-4 bg-gray-200 rounded w-1/2 mt-2"></h3>
+  <div className="flex justify-center">
+    <div className="card bg-base-100 shadow-lg animate-pulse cursor-pointer relative transition-transform transform hover:scale-105 hover:shadow-xl rounded-lg overflow-hidden" style={{ width: '200px' }}>
+      <figure className="h-64 w-full overflow-hidden relative rounded-t-lg bg-gray-200">
+        {/* Placeholder for image */}
+      </figure>
+      <div className="card-body">
+        <h2 className="h-6 bg-gray-200 rounded w-3/4 mb-2"></h2> {/* Title placeholder */}
+        <h3 className="h-4 bg-gray-200 rounded w-1/2"></h3> {/* Episode placeholder */}
+      </div>
     </div>
   </div>
 );
+
+// Function to truncate title for display
+const truncateTitle = (title, maxLength) => {
+  return title.length > maxLength ? `${title.slice(0, maxLength)}...` : title;
+};
 
 export default function SearchResults() {
   const [animes, setAnimes] = useState([]);
@@ -62,20 +71,38 @@ export default function SearchResults() {
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl">Search Results for "{query}"</h1>
-        <button onClick={handleHomeRedirect} className="btn btn-secondary">Home</button>
+        <h1 className="text-2xl mr-12">Search Results for "{query}"</h1> {/* Added margin right */}
+        <button
+          onClick={handleHomeRedirect}
+          className="btn btn-primary p-2 flex items-center justify-center" // Removed absolute positioning
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+            />
+          </svg>
+        </button>
       </div>
 
       {/* Search Bar */}
-      <form onSubmit={handleSearch} className="mb-6">
+      <form onSubmit={handleSearch} className="flex mb-6 space-x-2">
         <input
           type="text"
           placeholder="Search Animes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="input input-bordered w-full"
+          className="input input-bordered w-full h-12 px-4 rounded-lg shadow-sm border-gray-300 focus:outline-none focus:ring focus:ring-blue-500"
         />
-        <button type="submit" className="btn btn-primary mt-2">Search</button>
+        <button type="submit" className="btn btn-primary h-12">Search</button>
       </form>
 
       {loading ? (
@@ -85,25 +112,21 @@ export default function SearchResults() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {animes.map((anime) => (
             <div
               key={anime.title}
-              className="card bg-base-100 shadow-lg cursor-pointer"
+              className="flex justify-center"
               onClick={() => handleAnimeClick(anime)}
             >
-              <figure className="h-64 w-full overflow-hidden">
-                <img src={anime.imageUrl} alt={anime.title} className="object-cover h-full w-full" />
-              </figure>
-              <div className="card-body">
-                <h2 className="card-title">{anime.title}</h2>
-                <h3 className="text-sm text-gray-500">{anime.episode}</h3>
-                <button 
-                  onClick={() => handleAnimeClick(anime)} 
-                  className="btn btn-primary mt-2"
-                >
-                  Watch Now
-                </button>
+              <div className="card bg-base-100 shadow-lg cursor-pointer relative transition-transform transform hover:scale-105 hover:shadow-xl rounded-lg overflow-hidden" style={{ width: '200px' }}>
+                <figure className="h-64 w-full overflow-hidden relative rounded-t-lg">
+                  <img src={anime.imageUrl} alt={`Image of ${anime.title}`} className="object-cover h-full w-full" />
+                  <div className="absolute bottom-0 w-full bg-gradient-to-b from-transparent via-black/70 to-black p-2">
+                    <h2 className="text-white text-lg font-bold">{truncateTitle(anime.title, 20)}</h2>
+                    <h3 className="text-sm text-gray-300">{anime.episode}</h3>
+                  </div>
+                </figure>
               </div>
             </div>
           ))}
