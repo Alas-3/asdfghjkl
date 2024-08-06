@@ -1,7 +1,6 @@
-// AnimeSchedule.js
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router'; // Import useRouter for navigation
-import { getAnimeSchedule } from '../lib/jikan'; // Adjust the import path as necessary
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
+import { getAnimeSchedule } from '../lib/jikan';
 import { format } from 'date-fns';
 
 const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -19,26 +18,25 @@ const createAnimeUrlSlug = (title) => {
 const AnimeSchedule = () => {
   const [schedule, setSchedule] = useState({});
   const [selectedDay, setSelectedDay] = useState(daysOfWeek[new Date().getDay()]);
-  const router = useRouter(); // Initialize useRouter
+  const [hasMounted, setHasMounted] = useState(false); // Track initial render
+  const router = useRouter();
+  const buttonContainerRef = useRef(null);
 
   const fetchSchedule = async (day) => {
-    // Check localStorage for cached data and its timestamp
     const cachedData = JSON.parse(localStorage.getItem(`animeSchedule_${day}`));
     const cacheTimestamp = localStorage.getItem(`animeSchedule_${day}_timestamp`);
     const cacheValidDuration = 60 * 60 * 1000; // 1 hour in milliseconds
 
     const currentTime = Date.now();
 
-    // If we have cached data and it is still valid, use it
     if (cachedData && cacheTimestamp && (currentTime - cacheTimestamp < cacheValidDuration)) {
       setSchedule(prevSchedule => ({ ...prevSchedule, [day]: cachedData }));
-      return; // Use cached data
+      return;
     }
 
     try {
       const data = await getAnimeSchedule(day);
       setSchedule(prevSchedule => ({ ...prevSchedule, [day]: data.data }));
-      // Store the fetched data and current timestamp in localStorage
       localStorage.setItem(`animeSchedule_${day}`, JSON.stringify(data.data));
       localStorage.setItem(`animeSchedule_${day}_timestamp`, currentTime);
     } catch (error) {
@@ -48,9 +46,25 @@ const AnimeSchedule = () => {
 
   useEffect(() => {
     fetchSchedule(selectedDay);
+    setHasMounted(true); // Set mounted state to true after fetch
   }, [selectedDay]);
 
-  // Filter out animes with a score of "N/A"
+  useEffect(() => {
+    if (hasMounted && buttonContainerRef.current) {
+      const activeButton = buttonContainerRef.current.querySelector(`button[data-day="${selectedDay}"]`);
+      if (activeButton) {
+        const containerRect = buttonContainerRef.current.getBoundingClientRect();
+        const buttonRect = activeButton.getBoundingClientRect();
+
+        // Scroll the container so the active button is centered
+        buttonContainerRef.current.scrollTo({
+          left: buttonRect.left - containerRect.left - (containerRect.width / 2) + (buttonRect.width / 2),
+          behavior: 'smooth',
+        });
+      }
+    }
+  }, [hasMounted, selectedDay]);
+
   const filteredSchedule = (schedule[selectedDay] || []).filter(anime => anime.score && anime.score !== 'N/A');
 
   const truncateTitle = (title, maxLength) => {
@@ -72,15 +86,16 @@ const AnimeSchedule = () => {
 
   const handleAnimeClick = (animeTitle) => {
     const slug = createAnimeUrlSlug(animeTitle);
-    router.push(`/anime/${slug}`); // Redirect to the anime details page with the slug
+    router.push(`/anime/${slug}`);
   };
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex overflow-x-auto py-4 space-x-2 scrollbar-hide">
+      <div ref={buttonContainerRef} className="flex overflow-x-auto py-4 space-x-2 scrollbar-hide">
         {daysOfWeek.map((day) => (
           <button
             key={day}
+            data-day={day}
             className={`tab tab-bordered ${selectedDay === day ? 'border-2 border-green-500 text-green-500 rounded-full' : 'border-2 border-transparent text-white'} flex justify-center items-center px-4 transition duration-200`}
             onClick={() => {
               setSelectedDay(day);
@@ -98,11 +113,11 @@ const AnimeSchedule = () => {
         <h2 className="text-2xl font-bold mb-4">Anime Schedule for {selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}</h2>
         {filteredSchedule.length > 0 ? (
           <div className="overflow-x-auto">
-            <div className="flex space-x-4"> {/* Flex container for horizontal scroll */}
+            <div className="flex space-x-4">
               {filteredSchedule.map((anime) => (
-                <div key={anime.mal_id} className="flex-shrink-0" onClick={() => handleAnimeClick(anime.title)}> {/* Click handler */}
+                <div key={anime.mal_id} className="flex-shrink-0" onClick={() => handleAnimeClick(anime.title)}>
                   <div className="card bg-base-100 shadow-lg cursor-pointer relative transition-transform transform hover:scale-105 hover:shadow-xl rounded-lg overflow-hidden" style={{ width: '200px' }}>
-                    <figure className="h-72 w-full overflow-hidden relative rounded-t-lg"> {/* Set fixed height for image container */}
+                    <figure className="h-72 w-full overflow-hidden relative rounded-t-lg">
                       <img 
                         src={anime.images.jpg.large_image_url} 
                         alt={`Image of ${anime.title}`} 
@@ -112,8 +127,8 @@ const AnimeSchedule = () => {
                         <h2 className="text-white text-lg font-bold">{truncateTitle(anime.title, 20)}</h2>
                       </div>
                     </figure>
-                    <figcaption className="p-4 flex flex-col h-20 md:h-28 lg:h-32"> {/* Set fixed height for the figcaption section */}
-                      <div className="grid grid-cols-2 gap-1 mb-2 flex-grow"> {/* Flex-grow to ensure proper space distribution */}
+                    <figcaption className="p-4 flex flex-col h-20 md:h-28 lg:h-32">
+                      <div className="grid grid-cols-2 gap-1 mb-2 flex-grow">
                         <p className="text-sm text-gray-600 hidden md:block">Type: {anime.type || 'N/A'}</p>
                         <p className="text-sm text-gray-600">Episodes: {anime.episodes || 'N/A'}</p>
                         <p className="text-sm text-gray-600">Score: {anime.score || 'N/A'}</p>

@@ -41,7 +41,7 @@ const HeroBanner = ({ animes }) => {
 
   return (
     <div className="relative w-full cursor-pointer lg:rounded-t-lg" onClick={handleClick} {...handlers}>
-      <div className="hero-banner h-[calc(90vh-3rem)] md:h-[32rem] lg:h-[40rem] w-[calc(100%+3rem)] lg:w-full relative overflow-hidden lg:rounded-t-lg -mx-6 lg:mx-0 -mt-6 lg:mt-0">
+      <div className="hero-banner h-[calc(90vh-3rem)] md:h-[32rem] lg:h-[40rem] w-[calc(100%+3rem)] lg:w-full relative overflow-hidden lg:rounded-t-lg -mx-8 lg:mx-0 -mt-16 lg:mt-0">
         <img
           src={imageUrl}
           alt={title}
@@ -49,7 +49,7 @@ const HeroBanner = ({ animes }) => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent lg:rounded-t-lg"></div>
         <div className="absolute bottom-0 left-0 w-full p-6 md:p-8 lg:p-12 text-white">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">{title}</h1>
+          <h1 className="text-2xl pl-2 md:text-3xl lg:text-4xl font-bold">{title}</h1>
         </div>
       </div>
     </div>
