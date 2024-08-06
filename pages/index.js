@@ -54,7 +54,7 @@ function Home() {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
       <div className="sticky top-0 z-20 w-full"> {/* Ensure it's sticky and full width */}
-        <div className="flex justify-between items-center mt-4">
+        <div className="flex justify-between items-center pt-4 lg:pt-5">
           <HamburgerMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen}/>
           <div className="relative flex items-center ml-2 overflow-x-hidden"> {/* Adjusted margin for alignment */}
             <div
