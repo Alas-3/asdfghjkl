@@ -9,7 +9,7 @@ const HeroBanner = ({ animes }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % animes.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % (animes.length || 1)); // Ensure it wraps around correctly
     }, 10000); // Change image every 10 seconds
     return () => clearInterval(interval);
   }, [animes.length]);
@@ -21,11 +21,11 @@ const HeroBanner = ({ animes }) => {
   };
 
   const handleSwipedLeft = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % animes.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % (animes.length || 1));
   };
 
   const handleSwipedRight = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + animes.length) % animes.length);
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + (animes.length || 1)) % (animes.length || 1));
   };
 
   const handlers = useSwipeable({
@@ -33,15 +33,16 @@ const HeroBanner = ({ animes }) => {
     onSwipedRight: handleSwipedRight,
   });
 
-  if (animes.length === 0) {
-    return null;
+  // Early return if there are no animes
+  if (!animes || animes.length === 0) {
+    return null; // Or you can return a loading spinner or placeholder
   }
 
-  const { title, imageUrl } = animes[currentIndex];
+  const { title, imageUrl } = animes[currentIndex] || {}; // Destructure with a fallback
 
   return (
     <div className="relative w-full cursor-pointer lg:rounded-t-lg" onClick={handleClick} {...handlers}>
-      <div className="hero-banner h-[calc(90vh-3rem)] md:h-[32rem] lg:h-[40rem] w-[calc(100%+3rem)] lg:w-full relative overflow-hidden lg:rounded-t-lg -mx-8 lg:mx-0 -mt-16 lg:mt-0">
+      <div className="hero-banner h-[calc(90vh-5rem)] md:h-[32rem] lg:h-[40rem] w-[calc(100%+3rem)] lg:w-full relative overflow-hidden lg:rounded-t-lg -mx-8 lg:mx-0 -mt-16 lg:mt-0">
         <img
           src={imageUrl}
           alt={title}

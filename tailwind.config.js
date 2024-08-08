@@ -6,7 +6,11 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      spacing: {
+        '18': '4.5rem', // Add this line
+      },
+    },
   },
   plugins: [require("daisyui")],
 };

@@ -113,7 +113,7 @@ const AnimeSchedule = () => {
         <h2 className="text-2xl font-bold mb-4">Anime Schedule for {selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}</h2>
         {filteredSchedule.length > 0 ? (
           <div className="overflow-x-auto">
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 overflow-y-hidden">
               {filteredSchedule.map((anime) => (
                 <div key={anime.mal_id} className="flex-shrink-0" onClick={() => handleAnimeClick(anime.title)}>
                   <div className="card bg-base-100 shadow-lg cursor-pointer relative transition-transform transform hover:scale-105 hover:shadow-xl rounded-lg overflow-hidden" style={{ width: '200px' }}>

@@ -28,7 +28,7 @@ const AnimeCarousel = () => {
 
     return (
         <div className="mb-6">
-            <h2 className="text-2xl mb-4">Popular Airing Animes</h2>
+            <h2 className="text-2xl mb-4">Popular Anime</h2>
             {loading ? (
                 <div className="flex justify-center items-center">
                     <p>Loading...</p>
