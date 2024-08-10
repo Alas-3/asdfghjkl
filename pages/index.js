@@ -59,7 +59,7 @@ function Home() {
           <div className="relative flex items-center ml-2 overflow-x-hidden"> {/* Adjusted margin for alignment */}
             <div
               className={`flex items-center transition-all duration-300 ease-in-out transform ${
-                searchVisible ? 'translate-x-0 opacity-100 w-64 lg:w-72' : 'translate-x-0 opacity-100 w-7.5'
+                searchVisible ? 'translate-x-0 opacity-100 w-64 lg:w-72 lg:pb-1' : 'translate-x-0 opacity-100 w-7.5'
               }`}
             >
               <button

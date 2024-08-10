@@ -83,17 +83,17 @@ export default function AnimeDetails() {
   };
 
   useEffect(() => {
-    if (anime) {
+    if (anime && lastWatchedEpisode === null) {
+      fetchLastWatchedEpisode(); // Fetch the last watched episode only if it's not already fetched
       checkIfFavorite();
-      fetchLastWatchedEpisode(); // Fetch the last watched episode when anime details are available
       fetchJikanAnimeDetails(anime.title); // Fetch Jikan details
     }
-  }, [anime]);
+  }, [anime, lastWatchedEpisode]);
 
   const fetchLastWatchedEpisode = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-
+  
     const { data, error } = await supabase
       .from('watched_episodes')
       .select('*')
@@ -102,12 +102,15 @@ export default function AnimeDetails() {
       .order('created_at', { ascending: false }) // Order by created_at descending
       .limit(1)
       .single();
-
+  
+    // Removed error logging
     if (error) {
-      console.error('Error fetching last watched episode:', error);
+      // Handle error silently if needed (e.g., show a notification)
     } else {
       if (data) {
         setLastWatchedEpisode(data);
+      } else {
+        setLastWatchedEpisode(null); // Set to null to prevent further fetching
       }
     }
   };
@@ -185,10 +188,9 @@ export default function AnimeDetails() {
 
   const handleBackClick = () => {
     setIsNavigatingBack(true);
-    setTimeout(() => {
-      router.back();
-    }, 100);
+    router.back(); // Navigate back immediately
   };
+  
 
   const handleToggleFavorite = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -293,11 +295,11 @@ export default function AnimeDetails() {
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            stroke-width="1.5"
+            strokeWidth="1.5"
             stroke="currentColor"
             className="w-6 h-6"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
           </svg>
         </button>
 
@@ -323,7 +325,7 @@ export default function AnimeDetails() {
             <p className="text-gray-500 text-sm mb-4 hidden md:block">{anime.title_english}</p>
 
             <p className="font-bold mb-4">
-              {`Score: ${anime.score} | Season: ${anime.season ? anime.season.charAt(0).toUpperCase() + anime.season.slice(1) : 'N/A'} | Year: ${anime.year || 'N/A'}`}
+              {`Score: ${anime.score} | ${anime.season ? anime.season.charAt(0).toUpperCase() + anime.season.slice(1) : 'N/A'} ${anime.year || ''}`}
             </p>
 
             <div className="grid grid-cols-2 gap-2 mb-4">
