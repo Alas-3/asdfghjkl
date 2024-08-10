@@ -19,10 +19,11 @@ const SkeletonLoader = () => (
     <div className="card bg-base-100 shadow-lg animate-pulse cursor-pointer relative transition-transform transform hover:scale-105 hover:shadow-xl rounded-lg overflow-hidden" style={{ width: '200px' }}>
       <figure className="h-64 w-full overflow-hidden relative rounded-t-lg bg-gray-200">
         {/* Placeholder for image */}
+        <div className="h-full w-full bg-gray-300 animate-pulse"></div>
       </figure>
       <div className="card-body">
-        <h2 className="h-6 bg-gray-200 rounded w-3/4 mb-2"></h2> {/* Title placeholder */}
-        <h3 className="h-4 bg-gray-200 rounded w-1/2"></h3> {/* Episode placeholder */}
+        <h2 className="h-6 bg-gray-300 rounded w-3/4 mb-2"></h2> {/* Title placeholder */}
+        <h3 className="h-4 bg-gray-300 rounded w-1/2"></h3> {/* Episode placeholder */}
       </div>
     </div>
   </div>
@@ -71,10 +72,10 @@ export default function SearchResults() {
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl mr-12">Search Results for "{query}"</h1> {/* Added margin right */}
+        <h1 className="text-2xl mr-12">Search Results for "{query}"</h1>
         <button
           onClick={handleHomeRedirect}
-          className="btn btn-primary p-2 flex items-center justify-center" // Removed absolute positioning
+          className="btn btn-primary p-2 flex items-center justify-center"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +107,7 @@ export default function SearchResults() {
       </form>
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {Array.from({ length: 4 }).map((_, index) => (
             <SkeletonLoader key={index} />
           ))}
