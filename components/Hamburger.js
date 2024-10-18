@@ -1,109 +1,88 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
-import { supabase } from '../lib/supabase'; // Import supabase
+'use client'
 
-const HamburgerMenu = ({ setMenuOpen, menuOpen }) => {
-  const router = useRouter();
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Menu, X, User, LogOut } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+
+export default function HamburgerMenu() {
+  const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setIsOpen(false)
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.replace('/login');
-  };
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   const handleProfile = () => {
-    router.push('/profile'); // Navigate to the profile page
-  };
+    router.push('/profile')
+  }
+
+  const toggleMenu = () => setIsOpen(!isOpen)
 
   return (
-    <div className="z-20">
-      <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center justify-center lg:p-2"> {/* Remove btn-primary class and added padding */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="w-8 h-8" // Increased size of the hamburger icon
-          style={{
-            filter: 'drop-shadow(0 3px 3px rgba(0, 0, 0, 100))', // Darker shadow with full opacity
-          }}
-          
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
+    <div className="relative z-50">
+      <button
+        onClick={toggleMenu}
+        aria-expanded={isOpen}
+        aria-label="Toggle menu"
+        className="p-2 text-gray-200 hover:bg-gray-700 focus:ring-2 focus:ring-gray-400 rounded-md transition-colors"
+      >
+        <Menu className="h-6 w-6" />
       </button>
-      {menuOpen && (
-        <>
-          {/* Background overlay for closing the menu */}
-          <div
-            className="fixed inset-0 bg-black opacity-50 z-20 md:hidden" // Only show on mobile
-            onClick={() => setMenuOpen(false)} // Close on background click
-          ></div>
 
-          {/* Menu panel */}
-          <div className={`fixed inset-0 bg-gray-800 bg-opacity-70 backdrop-blur-lg border border-gray-600 rounded-lg z-30 transition-transform transform md:left-0 md:top-0 md:h-full md:w-64 ${menuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-            <div className="flex flex-col items-center justify-center h-full">
-              <button onClick={handleProfile} className="btn btn-primary w-3/4 mb-4 flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="w-6 h-6 mr-2"
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            aria-hidden="true"
+            onClick={toggleMenu}
+          />
+
+          <div 
+            className={`fixed inset-y-0 left-0 w-64 md:w-80 bg-gray-900 p-6 shadow-lg transition-transform duration-300 ease-in-out transform ${
+              isOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
+          >
+            <div className="flex flex-col h-full">
+              <div className="flex justify-end">
+                <button
+                  onClick={toggleMenu}
+                  aria-label="Close menu"
+                  className="p-2 text-gray-400 hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-md transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-                  />
-                </svg>
-                Profile
-              </button>
-              <button onClick={handleLogout} className="btn btn-secondary w-3/4 flex items-center justify-center mb-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="w-6 h-6 mr-2"
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <nav className="flex flex-col space-y-4 mt-8">
+                <button
+                  onClick={handleProfile}
+                  className="flex items-center justify-start px-4 py-2 text-sm font-medium text-gray-200 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"
-                  />
-                </svg>
-                Logout
-              </button>
-              {/* Close button moved below the logout button */}
-              <button
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-center w-3/4 mt-4"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="w-6 h-6 mr-2"
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center justify-start px-4 py-2 text-sm font-medium text-gray-200 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-                Close
-              </button>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </button>
+              </nav>
             </div>
           </div>
         </>
       )}
     </div>
-  );
-};
-
-export default HamburgerMenu;
+  )
+}
