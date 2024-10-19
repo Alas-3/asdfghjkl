@@ -1,128 +1,131 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { useRouter } from 'next/router';
-import withAuth from '../lib/withAuth';
+'use client'
+
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { useRouter } from 'next/router'
+import withAuth from '../lib/withAuth'
 
 // Function to convert title to URL slug
 const createAnimeUrlSlug = (title) => {
   return title
-    .normalize('NFD') // Normalize to decompose accented characters
-    .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .replace(/(\d)\.(\d)/g, '$1-$2') // Replace periods in numeric sequences with hyphens
-    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric characters with hyphens
-    .replace(/^-|-$/g, ''); // Remove leading and trailing hyphens
-};
+    .replace(/(\d)\.(\d)/g, '$1-$2')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
 
 // Function to truncate title
 const truncateTitle = (title, maxLength = 50) => {
   if (title.length <= maxLength) {
-    return title;
+    return title
   }
-  return title.slice(0, maxLength) + '...';
-};
+  return title.slice(0, maxLength) + '...'
+}
 
 function Profile() {
-  const [favorites, setFavorites] = useState([]);
-  const router = useRouter();
+  const [favorites, setFavorites] = useState([])
+  const router = useRouter()
 
   useEffect(() => {
     const fetchFavorites = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        console.error('User not authenticated');
-        return;
+        console.error('User not authenticated')
+        return
       }
 
       const { data, error } = await supabase
         .from('favorites')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
 
       if (error) {
-        console.error('Error fetching favorites:', error);
+        console.error('Error fetching favorites:', error)
       } else {
-        setFavorites(data);
+        setFavorites(data)
       }
-    };
+    }
 
-    fetchFavorites();
-  }, []);
+    fetchFavorites()
+  }, [])
 
   const handleAnimeClick = (anime) => {
-    const slug = createAnimeUrlSlug(anime.title);
-    router.push(`/anime/${slug}`);
-  };
+    const slug = createAnimeUrlSlug(anime.title)
+    router.push(`/anime/${slug}`)
+  }
 
   const handleResumeClick = async (anime) => {
-    const slug = createAnimeUrlSlug(anime.title);
-    router.push(`/anime/${slug}`);
+    const slug = createAnimeUrlSlug(anime.title)
+    router.push(`/anime/${slug}`)
 
     setTimeout(() => {
-      const currentEpisodeUrl = `/anime/${slug}/episode-${anime.current_episode}`;
-      router.push(currentEpisodeUrl);
-    }, 500); // Delay navigation to ensure correct URL structure
-  };
+      const currentEpisodeUrl = `/anime/${slug}/episode-${anime.current_episode}`
+      router.push(currentEpisodeUrl)
+    }, 500)
+  }
 
   const handleHomeClick = () => {
-    router.push('/'); // Redirect to home page
-  };
+    router.push('/')
+  }
 
   return (
-    <div className="flex flex-col min-h-screen relative">
-      <button
-        onClick={handleHomeClick}
-        className="btn btn-primary absolute top-6 right-8 z-10 p-2 flex items-center justify-center" // Moved to the right
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="w-6 h-6"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-          />
-        </svg>
-      </button>
+    <div className="min-h-screen bg-gray-900 text-gray-100">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">
+            Your Watchlist
+          </h1>
+          <button
+            onClick={handleHomeClick}
+            className="text-gray-300 hover:text-white transition-colors duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
+            </svg>
+          </button>
+        </div>
 
-      {/* Bubble-like Title */}
-      <div className="flex justify-start p-6">
-        <h1 className="bg-blue-500 text-white px-4 py-2 rounded-full text-2xl font-semibold shadow-lg">
-          Your Watchlist
-        </h1>
-      </div>
-
-      <div className="flex-grow container mx-auto p-6">
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {favorites.map((anime) => (
-            <div className="flex justify-center" key={anime.id} onClick={() => handleAnimeClick(anime)}>
-              <div className="card bg-base-100 shadow-lg cursor-pointer relative transition-transform transform hover:scale-105 hover:shadow-xl rounded-lg overflow-hidden" 
-                style={{ width: '250px', height: 'auto' }}>
-                <figure className="h-64 lg:h-80 w-full overflow-hidden relative rounded-t-lg"> {/* Changed height for desktop */}
-                  <img
-                    src={anime.imageUrl}
-                    alt={`Image of ${anime.title}`}
-                    className="object-cover h-full w-full"
-                  />
-                  <div className="absolute bottom-0 w-full bg-gradient-to-b from-transparent via-black/70 to-black p-2">
-                    <h2 className="text-white text-lg font-bold">{truncateTitle(anime.title, 20)}</h2>
-                    {anime.current_episode !== null && (
-                      <h3 className="text-sm text-gray-300">Episode {anime.current_episode}</h3>
-                    )}
-                  </div>
-                </figure>
+            <div
+              key={anime.id}
+              className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
+              onClick={() => handleAnimeClick(anime)}
+            >
+              <div className="relative pb-[150%]">
+                <img
+                  src={anime.imageUrl}
+                  alt={`Cover of ${anime.title}`}
+                  className="absolute top-0 left-0 w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent p-4">
+                  <h2 className="font-semibold text-lg text-white mb-1">
+                    {truncateTitle(anime.title, 20)}
+                  </h2>
+                  {anime.current_episode !== null && (
+                    <p className="text-sm text-gray-300">Episode {anime.current_episode}</p>
+                  )}
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default withAuth(Profile);
+export default withAuth(Profile)
