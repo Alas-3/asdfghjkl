@@ -62,7 +62,7 @@ function Home() {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
       <div className="sticky top-0 z-20 w-full">
-        <div className="flex justify-between items-center mt-5 md:mt-0 lg:py-5">
+        <div className="flex justify-between items-center py-3 md:py-0 lg:py-5">
           <HamburgerMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen}/>
           <div className="relative flex items-center ml-2 overflow-x-hidden">
             <div
@@ -100,7 +100,9 @@ function Home() {
         </div>
       </div>
 
-      <HeroBanner animes={animes} /> {/* Add the HeroBanner component here */}
+      <div className="-mx-4 sm:mx-0">
+        <HeroBanner animes={animes} /> {/* HeroBanner takes full width on mobile */}
+      </div>
 
       <div className="mt-5"> {/* Increased margin to move down further */}
         <AnimeCarousel /> {/* Add the AnimeCarousel component here */}

@@ -9,8 +9,8 @@ const HeroBanner = ({ animes }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % (animes.length || 1)); // Ensure it wraps around correctly
-    }, 10000); // Change image every 10 seconds
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % (animes.length || 1));
+    }, 10000);
     return () => clearInterval(interval);
   }, [animes.length]);
 
@@ -33,25 +33,30 @@ const HeroBanner = ({ animes }) => {
     onSwipedRight: handleSwipedRight,
   });
 
-  // Early return if there are no animes
   if (!animes || animes.length === 0) {
-    return null; // Or you can return a loading spinner or placeholder
+    return null;
   }
 
-  const { title, imageUrl } = animes[currentIndex] || {}; // Destructure with a fallback
+  const { title, imageUrl } = animes[currentIndex] || {};
 
   return (
-    <div className="relative w-full cursor-pointer lg:rounded-t-lg" onClick={handleClick} {...handlers}>
-      <div className="hero-banner h-[calc(90vh-5rem)] md:h-[32rem] lg:h-[40rem] w-[calc(100%+3rem)] lg:w-full relative overflow-hidden lg:rounded-t-lg -mx-8 lg:mx-0 -mt-16 lg:mt-0">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="absolute inset-0 w-full h-full object-cover object-center transform transition-transform duration-500 ease-in-out hover:scale-105 lg:rounded-t-lg"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent lg:rounded-t-lg"></div>
-        <div className="absolute bottom-0 left-0 w-full p-6 md:p-8 lg:p-12 text-white">
-          <h1 className="text-2xl pl-2 md:text-3xl lg:text-4xl font-bold">{title}</h1>
-        </div>
+    <div className="relative w-full h-[calc(90vh-5rem)] md:h-[32rem] lg:h-[40rem] overflow-hidden" {...handlers}>
+      <div className="absolute inset-0 bg-gray-900 opacity-50"></div>
+      <img
+        src={imageUrl}
+        alt={title}
+        className="absolute inset-0 w-full h-full object-cover object-center transform transition-transform duration-500 ease-in-out scale-105"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/70 to-transparent"></div>
+      <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8 lg:p-12">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">{title}</h1>
+        <button 
+  onClick={handleClick}
+  className="bg-transparent border-2 border-red-600 text-red-600 font-semibold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 hover:bg-red-600 hover:text-white backdrop-filter backdrop-blur-lg bg-opacity-20"
+>
+  Watch Now
+</button>
+
       </div>
     </div>
   );
