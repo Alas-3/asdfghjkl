@@ -1,21 +1,24 @@
 // pages/index.js
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { scrapePopularAnimes } from '../lib/scrape';
-import { supabase } from '../lib/supabase';
-import withAuth from '../lib/withAuth';
-import HamburgerMenu from '../components/Hamburger';
-import AnimeCard, { createAnimeUrlSlug, truncateTitle } from '../components/AnimeCard';
-import SkeletonLoader from '../components/SkeletonLoader';
-import AnimeCarousel from '../components/AnimeCarousel';
-import NewAnimeCarousel from '../components/NewAnimeCarousel';
-import HeroBanner from '../components/HeroBanner'; // Import the HeroBanner
-import AnimeSchedule from '../components/AnimeSchedule';
-import { Search } from 'lucide-react'
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { scrapePopularAnimes } from "../lib/scrape";
+import { supabase } from "../lib/supabase";
+import withAuth from "../lib/withAuth";
+import HamburgerMenu from "../components/Hamburger";
+import AnimeCard, {
+  createAnimeUrlSlug,
+  truncateTitle,
+} from "../components/AnimeCard";
+import SkeletonLoader from "../components/SkeletonLoader";
+import AnimeCarousel from "../components/AnimeCarousel";
+import NewAnimeCarousel from "../components/NewAnimeCarousel";
+import HeroBanner from "../components/HeroBanner"; // Import the HeroBanner
+import AnimeSchedule from "../components/AnimeSchedule";
+import { Search } from "lucide-react";
 
 function Home() {
   const [animes, setAnimes] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
@@ -33,11 +36,11 @@ function Home() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.replace('/login');
+    router.replace("/login");
   };
 
   const handleProfile = () => {
-    router.push('/profile');
+    router.push("/profile");
   };
 
   const handleSearch = (e) => {
@@ -46,11 +49,11 @@ function Home() {
   };
 
   const toggleSearch = () => {
-    setSearchVisible(!searchVisible)
+    setSearchVisible(!searchVisible);
     if (searchVisible) {
-      setSearchTerm('')
+      setSearchTerm("");
     }
-  }
+  };
 
   const handleAnimeClick = async (anime) => {
     const urlSlug = createAnimeUrlSlug(anime.title);
@@ -63,11 +66,11 @@ function Home() {
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
       <div className="sticky top-0 z-20 w-full">
         <div className="flex justify-between items-center py-3 md:py-0 lg:py-5">
-          <HamburgerMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen}/>
+          <HamburgerMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
           <div className="relative flex items-center ml-2 overflow-x-hidden">
             <div
               className={`flex items-center transition-all duration-300 ease-in-out ${
-                searchVisible ? 'w-64 lg:w-72' : 'w-10'
+                searchVisible ? "w-64 lg:w-72" : "w-10"
               }`}
             >
               <button
@@ -80,7 +83,7 @@ function Home() {
               <form
                 onSubmit={handleSearch}
                 className={`transition-all duration-300 ease-in-out ${
-                  searchVisible ? 'w-full ml-2 opacity-100' : 'w-0 opacity-0'
+                  searchVisible ? "w-full ml-2 opacity-100" : "w-0 opacity-0"
                 }`}
               >
                 <input
@@ -90,7 +93,7 @@ function Home() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full py-2 px-4 bg-gray-800 text-gray-100 rounded-full placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out"
                   style={{
-                    width: searchVisible ? '100%' : '0',
+                    width: searchVisible ? "100%" : "0",
                     opacity: searchVisible ? 1 : 0,
                   }}
                 />
@@ -101,13 +104,18 @@ function Home() {
       </div>
 
       <div className="-mx-4 sm:mx-0">
-        <HeroBanner animes={animes} /> {/* HeroBanner takes full width on mobile */}
+        <HeroBanner animes={animes} />{" "}
+        {/* HeroBanner takes full width on mobile */}
       </div>
 
-      <div className="mt-5"> {/* Increased margin to move down further */}
+      <div className="mt-5">
+        {" "}
+        {/* Increased margin to move down further */}
         <AnimeCarousel /> {/* Add the AnimeCarousel component here */}
         <NewAnimeCarousel /> {/* Add the NewAnimeCarousel component here */}
-        <AnimeSchedule />
+        <div className="-mx-4 sm:mx-0">
+          <AnimeSchedule />
+        </div>
       </div>
 
       <div className="flex justify-between items-center mb-6 mt-16">
@@ -123,7 +131,11 @@ function Home() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {animes.map((anime) => (
-            <AnimeCard key={anime.title} anime={anime} handleAnimeClick={handleAnimeClick} />
+            <AnimeCard
+              key={anime.title}
+              anime={anime}
+              handleAnimeClick={handleAnimeClick}
+            />
           ))}
         </div>
       )}
