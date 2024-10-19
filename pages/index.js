@@ -15,6 +15,8 @@ import NewAnimeCarousel from "../components/NewAnimeCarousel";
 import HeroBanner from "../components/HeroBanner"; // Import the HeroBanner
 import AnimeSchedule from "../components/AnimeSchedule";
 import { Search } from "lucide-react";
+import { motion } from 'framer-motion'
+import { ChevronRight } from 'lucide-react'
 
 function Home() {
   const [animes, setAnimes] = useState([]);
@@ -118,27 +120,43 @@ function Home() {
         </div>
       </div>
 
-      <div className="flex justify-between items-center mb-6 mt-16">
-        <h1 className="text-4xl">Recent Releases</h1>
-      </div>
+      <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-white">
+            Recent Releases
+          </h2>
 
-      {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {Array.from({ length: 10 }).map((_, index) => (
-            <SkeletonLoader key={index} />
-          ))}
         </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {animes.map((anime) => (
-            <AnimeCard
-              key={anime.title}
-              anime={anime}
-              handleAnimeClick={handleAnimeClick}
-            />
-          ))}
-        </div>
-      )}
+
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+            {Array.from({ length: 12 }).map((_, index) => (
+              <div key={index} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                <SkeletonLoader />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <motion.div 
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            {animes.map((anime, index) => (
+              <motion.div
+                key={anime.mal_id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <AnimeCard
+                  anime={anime}
+                  handleAnimeClick={() => handleAnimeClick(anime)}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
     </div>
   );
 }
