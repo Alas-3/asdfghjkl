@@ -64,6 +64,7 @@ const NewAnimeCarousel = () => {
                             <AnimeCard anime={anime} handleAnimeClick={handleAnimeClick} />
                         </div>
                     ))}
+
                 </div>
             )}
         </div>

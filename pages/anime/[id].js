@@ -30,7 +30,7 @@ export default function AnimeDetails() {
 
   useEffect(() => {
     if (id) {
-      const url = `https://gogoanime3.co/category/${id}`;
+      const url = `https://gogoanime3.cc/category/${id}`;
       const fetchAnimeDetails = async () => {
         const data = await scrapeAnimeDetails(url);
         setAnime(data);
@@ -145,7 +145,7 @@ export default function AnimeDetails() {
   
       // Construct the URL using the anime title and episode slug
       const animeSlug = createAnimeUrlSlug(anime.title);
-      const videoUrl = `https://gogoanime3.co/${animeSlug}-${episodeSlug}`;
+      const videoUrl = `https://gogoanime3.cc/${animeSlug}-${episodeSlug}`;
   
       const fetchedVideoUrl = await scrapeEpisodeVideoUrl(videoUrl);
       if (!fetchedVideoUrl) {
@@ -256,7 +256,7 @@ export default function AnimeDetails() {
     const animeSlug = createAnimeUrlSlug(anime.title);
 
     // Construct the video URL
-    const videoUrl = `https://gogoanime3.co/${animeSlug}-${episodeSlug}`;
+    const videoUrl = `https://gogoanime3.cc/${animeSlug}-${episodeSlug}`;
 
     // Fetch the video URL using scrapeEpisodeVideoUrl
     const videoPlayerUrl = await scrapeEpisodeVideoUrl(videoUrl);
